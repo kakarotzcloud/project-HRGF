@@ -1,0 +1,6 @@
+bucket       = "hrgf-terraform-stage-backend"
+key          = "terraform-stage.tfstate"
+region       = "ap-south-1"
+encrypt      = true
+use_lockfile = true
+profile      = "aws

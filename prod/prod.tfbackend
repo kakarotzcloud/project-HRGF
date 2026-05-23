@@ -1,0 +1,6 @@
+bucket       = "hrgf-terraform-prod-backend"
+key          = "terraform-prod.tfstate"
+region       = "ap-south-1"
+encrypt      = true
+use_lockfile = true
+profile      = "aws
