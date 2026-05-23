@@ -39,7 +39,7 @@ resource "aws_s3_bucket_policy" "terraform_state" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
+        Effect    = "Deny"
         Principal = "*"
         Action = [
           "s3:*"
@@ -50,7 +50,7 @@ resource "aws_s3_bucket_policy" "terraform_state" {
         ]
         Condition = {
           Bool = {
-            "aws:SecureTransport" = "true"
+            "aws:SecureTransport" = "false"
           }
         }
       }
