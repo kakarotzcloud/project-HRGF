@@ -48,7 +48,7 @@ resource "aws_s3_bucket_policy" "terraform_state" {
           "${aws_s3_bucket.terraform_state.arn}/*",
           aws_s3_bucket.terraform_state.arn
         ]
-        condtion = {
+        Condition = {
           Bool = {
             "aws:SecureTransport" = "true"
           }
