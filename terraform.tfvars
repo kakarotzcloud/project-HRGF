@@ -1,2 +1,1 @@
-aws_region  = "ap-south-1"
-bucket_name = "hrgf-terraform-backend"
+aws_region = "ap-south-1"
