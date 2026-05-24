@@ -99,6 +99,8 @@ pipeline {
                         helm upgrade --install ${HELM_RELEASE} ${HELM_CHART_PATH} \
                             --set image.repository=${NEXUS_DOCKER_REPO}/${IMAGE_NAME} \
                             --set image.tag=${IMAGE_TAG} \
+                            --set ingress.enabled=true \
+                            --set ingress.host=a9b259a56938c445c8c22c762854bddc-48708030.ap-south-1.elb.amazonaws.com \
                             --wait \
                             --timeout 5m
                     """
