@@ -108,11 +108,21 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                sh """
-                    kubectl rollout status deployment/${HELM_RELEASE} --timeout=3m
-                    kubectl get pods -l app=${HELM_RELEASE}
-                    kubectl get ingress ${HELM_RELEASE}
-                """
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-cred',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh """
+                        aws eks update-kubeconfig \
+                            --region ${AWS_REGION} \
+                            --name ${EKS_CLUSTER}
+                    
+                        kubectl rollout status deployment/${HELM_RELEASE} --timeout=3m
+                        kubectl get pods -l app=${HELM_RELEASE}
+                        kubectl get ingress ${HELM_RELEASE}
+                    """
             }
         }
     }
