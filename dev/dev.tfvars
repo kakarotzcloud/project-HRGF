@@ -10,3 +10,5 @@ aws_public_subnet = {
 }
 nat_gateway_subnet_cidr = "10.0.128.0/18"
 environment             = "dev"
+eks_version             = "1.34"
+instance_type           = ["t3.small"]

@@ -20,6 +20,14 @@ output "private_subnet_ids" {
   value       = { for subnet in aws_subnet.private : subnet.availability_zone => subnet.id }
 }
 
+output "private_subnet_ids_list" {
+  description = "IDs of private subnets"
+
+  value = [
+    for subnet in aws_subnet.private : subnet.id
+  ]
+}
+
 output "public_subnet_cidrs" {
   description = "CIDR blocks of public subnets"
   value       = { for subnet in aws_subnet.public : subnet.availability_zone => subnet.cidr_block }

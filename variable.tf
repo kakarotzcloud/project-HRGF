@@ -31,3 +31,14 @@ variable "environment" {
   description = "The environment name (dev, staging, prod)"
   type        = string
 }
+
+variable "eks_version" {
+  description = "The Kubernetes version for the EKS cluster"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "The EC2 instance type for the EKS worker nodes"
+  type        = list(string)
+
+}
