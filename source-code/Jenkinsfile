@@ -1,0 +1,83 @@
+pipeline {
+    agent any
+    tools {
+        maven 'maven3'
+    }
+    environment {
+        IMAGE_NAME       = 'springboot-demo'
+        IMAGE_TAG        = "v${BUILD_NUMBER}"
+        NEXUS_DOCKER_REPO = 'kakarot-jenkins.myvnc.com'
+    }
+    options {
+        timestamps()
+    }
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[
+                        credentialsId: 'git-cred',
+                        url: 'https://github.com/kakarotzcloud/project-HRGF.git']],
+                    extensions: [
+                        [$class: 'SparseCheckoutPaths',
+                        sparseCheckoutPaths: [
+                            [$class: 'SparseCheckoutPath',
+                            path: 'source-code']
+                            ]
+                        ]
+                    ]
+                ])
+            }
+        }
+        stage('Build JAR') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            }
+        }
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-cred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login \
+                            kakarot-jenkins.myvnc.com \
+                            -u "$DOCKER_USER" \
+                            --password-stdin
+                    '''
+                }
+            }
+        }
+        stage('Tag Docker Image') {
+            steps {
+                sh """
+                    docker tag \
+                        ${IMAGE_NAME}:${IMAGE_TAG} \
+                        ${NEXUS_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                """
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                sh "docker push ${NEXUS_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+    }
+    post {
+        success {
+            echo "Image pushed: ${NEXUS_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
