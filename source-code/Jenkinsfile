@@ -113,7 +113,6 @@ pipeline {
             }
         }
     }
-    }
     post {
         success {
             echo "Image pushed: ${NEXUS_DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
