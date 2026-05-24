@@ -5,13 +5,13 @@ terraform {
       version = "6.40.0"
     }
   }
-  #   backend "s3" {
-  #   }
-
-  # initially using local backend - 2nd commit
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
   }
+
+  # #   initially using local backend - 2nd commit
+  # #   backend "local" {
+  # #     path = "terraform.tfstate"
+  # #   }
 }
 
 provider "aws" {
