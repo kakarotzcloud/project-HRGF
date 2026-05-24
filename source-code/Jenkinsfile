@@ -10,7 +10,7 @@ pipeline {
         EKS_CLUSTER       = 'dev-eks-cluster'
         AWS_REGION        = 'ap-south-1'
         HELM_RELEASE      = 'springboot-demo'
-        HELM_CHART_PATH   = './helm/springboot-demo'
+        HELM_CHART_PATH   = './helm/springboot-app'
     }
     options {
         timestamps()
@@ -28,7 +28,10 @@ pipeline {
                         [$class: 'SparseCheckoutPaths',
                         sparseCheckoutPaths: [
                             [$class: 'SparseCheckoutPath',
-                            path: 'source-code']
+                            path: 'source-code'],
+                            [$class: 'SparseCheckoutPath',
+                            path: 'helm'
+                            ]
                             ]
                         ]
                     ]
