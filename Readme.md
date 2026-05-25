@@ -154,6 +154,9 @@ stage.tfvars
 ```
 
 
+
+````
+
 # Step 1: AWS Credentials Setup
 
 ```bash
@@ -167,7 +170,7 @@ aws configure
 
 # Verify configuration
 aws sts get-caller-identity
-````
+```
 
 # Step 2: Deploy Infrastructure (Terraform)
 
