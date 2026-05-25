@@ -10,163 +10,149 @@ This project automates the complete lifecycle of deploying a web application to 
 
 Live Application: [Application URL](http://a9b259a56938c445c8c22c762854bddc-48708030.ap-south-1.elb.amazonaws.com/)
 
-┌──────────────────────────────────────────────────────────────┐
-│ GitHub Repository │
-│ (Spring Boot Source + Dockerfile + Helm Charts + │
-│ Terraform + Jenkins Pipeline) │
-└──────────────────────┬───────────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────────────────────┐
-│ Jenkins CI/CD Pipeline │
-│ ┌──────────┬───────────┬──────────────┬────────────┐ │
-│ │ SCM │ Build & │ Build & │ Deploy │ │
-│ │ Checkout│ Test │ Push Docker │ via Helm │ │
-│ │ │ (Maven) │ to ECR │ to EKS │ │
-│ └──────────┴───────────┴──────────────┴────────────┘ │
-└──────────────────────┬───────────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────────────────────┐
-│ Amazon Web Services (AWS) │
-│ ┌────────────────────────────────────────────────────────┐ │
-│ │ Amazon Elastic Kubernetes Service (EKS) │ │
-│ │ (Provisioned via Terraform) │ │
-│ │ │ │
-│ │ ┌──────────────────────────────────────────────────┐ │ │
-│ │ │ VPC (Custom Networking) │ │ │
-│ │ │ ┌──────────────────────────────────────────┐ │ │ │
-│ │ │ │ EKS Control Plane (AWS Managed) │ │ │ │
-│ │ │ └──────────────────────────────────────────┘ │ │ │
-│ │ │ ┌──────────────────────────────────────────┐ │ │ │
-│ │ │ │ Worker Nodes (EC2 instances) │ │ │ │
-│ │ │ │ ┌──────────────────────────────────┐ │ │ │ │
-│ │ │ │ │ Deployment (Spring Boot App) │ │ │ │ │
-│ │ │ │ │ ├── Pod 1 (via HPA) │ │ │ │ │
-│ │ │ │ │ ├── Pod 2 (via HPA) │ │ │ │ │
-│ │ │ │ │ └── Pod N (Auto-scaling) │ │ │ │ │
-│ │ │ │ └──────────────────────────────────┘ │ │ │ │
-│ │ │ │ ┌──────────────────────────────────┐ │ │ │ │
-│ │ │ │ │ Service (ClusterIP) │ │ │ │ │
-│ │ │ │ └──────────────────────────────────┘ │ │ │ │
-│ │ │ │ ┌──────────────────────────────────┐ │ │ │ │
-│ │ │ │ │ Ingress (Public HTTP/HTTPS) │ │ │ │ │
-│ │ │ │ └──────────────────────────────────┘ │ │ │ │
-│ │ │ └──────────────────────────────────────────┘ │ │ │
-│ │ └──────────────────────────────────────────────────┘ │ │
-│ │ │ │
-│ │ ┌──────────────────┐ ┌────────────────────────┐ │ │
-│ │ │ ECR │ │ S3 (TF State, │ │ │
-│ │ │ (Docker Images) │ │ Artifacts) │ │ │
-│ │ └──────────────────┘ └────────────────────────┘ │ │
-│ │ │ │
-│ └────────────────────────────────────────────────────────┘ │
-│ │
-│ ┌──────────────────────────────────────────────────────┐ │
-│ │ IAM Roles & Policies (RBAC + K8s ServiceAccount) │ │
-│ └──────────────────────────────────────────────────────┘ │
-│ │
-└──────────────────────────────────────────────────────────────┘
+![alt text](image.png)
 
-```
+````
 
 ---
 
  📁 Project Structure
 
+
+```text
+| .gitignore
+| image.png
+| Readme.md
+|
++---helm
+| \---springboot-app
+| | Chart.yaml
+| | values.yaml
+| |
+| \---templates
+| deployment.yaml
+| hpa.yaml
+| ingress.yaml
+| service.yaml
+| serviceaccount.yaml
+| \_helpers.tpl
+|
++---source-code
+| | .gitattributes
+| | Dockerfile
+| | HELP.md
+| | Jenkinsfile
+| | mvnw
+| | mvnw.cmd
+| | pom.xml
+| |
+| +---.mvn
+| | \---wrapper
+| | maven-wrapper.properties
+| |
+| +---.vscode
+| | settings.json
+| |
+| +---src
+| | +---main
+| | | +---java
+| | | | \---com
+| | | | \---example
+| | | | \---demo
+| | | | DemoApplication.java
+| | | | HelloController.java
+| | | |
+| | | \---resources
+| | | | application.properties
+| | | |
+| | | +---static
+| | | \---templates
+| | \---test
+| | \---java
+| | \---com
+| | \---example
+| | \---demo
+| | DemoApplicationTests.java
+| |
+| \---target
+| +---classes
+| | | application.properties
+| | |
+| | \---com
+| | \---example
+| | \---demo
+| | DemoApplication.class
+| | HelloController.class
+| |
+| \---test-classes
+| \---com
+| \---example
+| \---demo
+| DemoApplicationTests.class
+|
+\---terraform
+| .terraform.lock.hcl
+| main.tf
+| provider.tf
+| terraform.tfstate
+| terraform.tfstate.backup
+| terraform.tfvars
+| variable.tf
+|
++---.terraform
+| | terraform.tfstate
+| |
+| +---modules
+| | modules.json
+| |
+| \---providers
+| \---registry.terraform.io
+| \---hashicorp
+| \---aws
+| \---6.40.0
+| \---windows_amd64
+| LICENSE.txt
+| terraform-provider-aws_v6.40.0_x5.exe
+|
++---dev
+| dev.tfbackend
+| dev.tfvars
+|
++---modules
+| +---ec2
+| | main.tf
+| | variable.tf
+| |
+| +---eks
+| | main.tf
+| | output.tf
+| | variable.tf
+| |
+| +---iam
+| | data.tf
+| | main.tf
+| | output.tf
+| | variable.tf
+| |
+| +---s3
+| | main.tf
+| | output.tf
+| | variable.tf
+| |
+| \---vpc
+| main.tf
+| output.tf
+| variable.tf
+|
++---prod
+| prod.tfbackend
+| prod.tfvars
+|
+\---stage
+stage.tfbackend
+stage.tfvars
 ```
 
-project-HRGF/
-│
-├── Readme.md # This file
-├── .gitignore
-│
-├── source-code/ # Spring Boot Application
-│ ├── Dockerfile # Multi-stage Docker build
-│ ├── Jenkinsfile # Jenkins CI/CD Pipeline
-│ ├── pom.xml # Maven dependencies
-│ ├── mvnw / mvnw.cmd # Maven wrapper
-│ │
-│ ├── src/
-│ │ ├── main/
-│ │ │ ├── java/com/example/demo/
-│ │ │ │ ├── DemoApplication.java # Spring Boot main class
-│ │ │ │ └── HelloController.java # REST controller
-│ │ │ │
-│ │ │ └── resources/
-│ │ │ ├── application.properties # App config
-│ │ │ ├── static/ # Static files (CSS, JS)
-│ │ │ └── templates/ # Thymeleaf templates
-│ │ │
-│ │ └── test/
-│ │ └── java/.../DemoApplicationTests.java
-│ │
-│ ├── .mvn/wrapper/ # Maven configuration
-│ └── target/ # Build artifacts (gitignored)
-│
-├── helm/ # Helm Charts (Package Manager for K8s)
-│ └── springboot-app/
-│ ├── Chart.yaml # Helm chart metadata
-│ ├── values.yaml # Default configuration values
-│ │
-│ └── templates/
-│ ├── deployment.yaml # K8s Deployment (templated)
-│ ├── service.yaml # K8s Service (ClusterIP)
-│ ├── ingress.yaml # K8s Ingress (external access)
-│ ├── hpa.yaml # Horizontal Pod Autoscaler
-│ ├── serviceaccount.yaml # RBAC ServiceAccount
-│ ├── \_helpers.tpl # Helm template helpers
-│ └── configmap.yaml # ConfigMaps (if needed)
-│
-└── terraform/ # Infrastructure as Code (AWS)
-├── main.tf # Primary Terraform configuration
-├── provider.tf # AWS provider setup
-├── variable.tf # Variable definitions
-├── terraform.tfvars # Production variables
-├── terraform.tfstate # State file (track infra changes)
-├── .terraform.lock.hcl # Dependency lock file
-│
-├── dev/ # Development Environment
-│ ├── dev.tfvars # Dev-specific variables
-│ └── dev.tfbackend # Dev S3 backend config
-│
-├── stage/ # Staging Environment
-│ ├── stage.tfvars # Stage-specific variables
-│ └── stage.tfbackend # Stage S3 backend config
-│
-├── prod/ # Production Environment
-│ ├── prod.tfvars # Prod-specific variables
-│ └── prod.tfbackend # Prod S3 backend config
-│
-├── .terraform/ # Terraform cache (gitignored)
-│ ├── modules/
-│ └── providers/
-│
-└── modules/ # Reusable Terraform Modules
-├── vpc/ # Virtual Private Cloud
-│ ├── main.tf
-│ ├── output.tf
-│ └── variable.tf
-│
-├── eks/ # Elastic Kubernetes Service
-│ ├── main.tf
-│ ├── output.tf
-│ └── variable.tf
-│
-├── iam/ # Identity & Access Management
-│ ├── main.tf
-│ ├── data.tf
-│ ├── output.tf
-│ └── variable.tf
-│
-├── ec2/ # Elastic Compute Cloud (Worker Nodes)
-│ ├── main.tf
-│ └── variable.tf
-│
-└── s3/ # S3 Bucket (Terraform state storage)
-├── main.tf
-├── output.tf
-└── variable.tf
 
 # Step 1: AWS Credentials Setup
 
@@ -181,7 +167,7 @@ aws configure
 
 # Verify configuration
 aws sts get-caller-identity
-```
+````
 
 # Step 2: Deploy Infrastructure (Terraform)
 
