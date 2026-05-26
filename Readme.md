@@ -8,7 +8,7 @@ This project automates the complete lifecycle of deploying a web application to 
 - CI/CD Automation: Jenkins pipeline triggers builds, pushes images, and deploys on every commit to `main`
 - Public Access: Application exposed via LoadBalancer Service (or Ingress)
 
-Live Application: [Application URL](http://a9b259a56938c445c8c22c762854bddc-48708030.ap-south-1.elb.amazonaws.com/)
+Live Application: [Application URL](https://kakarot-jenkins.myvnc.com/app/)
 
 ![alt text](image.png)
 
